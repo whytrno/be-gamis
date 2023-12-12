@@ -14,6 +14,8 @@ return new class extends Migration
         Schema::create('multiple_choices', function (Blueprint $table) {
             $table->id();
             $table->longText('question');
+            $table->longText('answer');
+            $table->string('correct_answer');
             $table->timestamps();
         });
     }

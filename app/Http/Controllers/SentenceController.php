@@ -2,19 +2,25 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\History;
 use App\Models\Sentence;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class SentenceController extends Controller
 {
     //tampilkan semua data
-    public function index()
+    public function index($count = null)
     {
-        //ambil semua data database
-        $sentences = Sentence::all();
+        if ($count) {
+            $sentences = Sentence::inRandomOrder()->get($count);
+        } else {
+            $sentences = Sentence::all();
+        }
         //kembalikan dalam bentuk json
-        return response()->json(['sentences' => $sentences]);
+        return $this->successResponse($sentences);
     }
+
     //tampilkan data berdasarkan id
     public function show($id)
     {
@@ -58,5 +64,35 @@ class SentenceController extends Controller
         $sentence->delete();
         //kembalikan dalam bentuk json dengan pesan "Sentence deleted successfully"
         return response()->json(['message' => 'Sentence deleted successfully']);
+    }
+
+
+    public function answer(Request $request)
+    {
+        $request->validate([
+            'questions' => 'required|array',
+            'questions.*.id_question' => 'required|integer',
+
+        ]);
+
+        $userAnswer = $request->questions;
+
+        foreach ($userAnswer as $ua) {
+            $user = Auth::user();
+            //history
+            $history = History::create([
+                'user_id' => $user->id,
+                'game_type' => 'sentence',
+                'game_id' => $ua['id_question'],
+            ]);
+            return $this->successResponse($history, 'History created successfully', 201);
+            //end history
+
+            $user->score += 15;
+            $user->save();
+        }
+        return $this->successResponse('Correct Answer', [
+            'score' => $user->score,
+        ]);
     }
 }

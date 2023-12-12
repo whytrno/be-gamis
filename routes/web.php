@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AuthController;
 
 /*
 |--------------------------------------------------------------------------
@@ -16,3 +17,13 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('welcome');
 });
+// Route::get('/index', function () {
+//     return view('index');
+// })->name('index');
+
+Route::get('/login', function () {
+    return response()->json([
+        "status" => 401,
+        "message" => "You are not logged in, please login first"
+    ], 401);
+})->name('login');
